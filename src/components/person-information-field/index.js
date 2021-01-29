@@ -1,0 +1,1 @@
+export { default } from './person-information-field.component.jsx'
