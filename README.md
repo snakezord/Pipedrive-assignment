@@ -2,12 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## You should create **.env** with this variable as **token**:\
-**REACT_APP_TOKEN**="pipedrive token"\
+## You should create **.env** with this variable as **token**:
+**REACT_APP_TOKEN**="pipedrive token"
 
-**Otherwise** use my token.\
+**Otherwise** use my token.
 
-If you use new token check my custom variables names in '../API/cutom_fields.js'\
+If you use new token check my custom variables names in '../API/cutom_fields.js'
 and create those fields for Person.
 
 
