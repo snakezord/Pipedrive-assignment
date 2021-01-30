@@ -1,5 +1,9 @@
 import styled from 'styled-components'
 
+export const Wrapper = styled.div`
+  padding: 0 1rem;
+`
+
 export const Main = styled.div`
   display: flex;
   flex-direction: column;

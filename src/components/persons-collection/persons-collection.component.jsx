@@ -2,13 +2,18 @@ import { Wrapper } from './persons-collection.styles'
 import Person from '../person'
 import Spinner from '../spinner'
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { useQuery, useQueryClient } from 'react-query'
+import { useQuery, useQueryClient, useMutation } from 'react-query'
 import { API } from '../../API/api.js'
-//import { CUSTOM_FIELDS_KEYS } from '../../API/custom-fields.js'
+import _ from 'lodash'
+import { CUSTOM_FIELDS_KEYS } from '../../API/custom-fields.js'
 
 const Persons = () => {
   
-  const { data, isFetching, isSuccess } = useQuery('persons', () => API.get('/persons'), {
+  const { data, isFetching, isSuccess } = useQuery('persons', () => API.get('/persons', {
+    params: {
+      sort: `${CUSTOM_FIELDS_KEYS.order} ASC`
+    }
+  }), {
     //onSuccess: data => console.log(data),
     onError: error => console.log(error)
   })
@@ -22,17 +27,22 @@ const Persons = () => {
     return result;
   }
 
-  const onDragEnd = (result) => {
+  const updatePerson = useMutation(newPerson => API.put(`/persons/${newPerson.id}`, newPerson), {
+    onSuccess: () => {
+      queryClient.invalidateQueries('persons')
+    },
+    onError: error => console.log(error)
+  })
+
+  const onDragEnd = async (result) => {
 
     const { destination, source } = result    
     if(!destination) return
-    if(destination.droppableId === source.droppableId && destination.index === source.index) return
+    if(destination.droppableId === source.droppableId && destination.index === source.index) return    
 
-    //console.log(destination, source, draggableId)
+    await queryClient.cancelQueries('persons')
 
     const prevPersons = queryClient.getQueryData('persons')
-
-    //console.log('before reorder: ', prevPersons)
 
     const orderedData = reorder(
       prevPersons.data.data,
@@ -40,13 +50,15 @@ const Persons = () => {
       result.destination.index
     )
     
-    const afterPersons = prevPersons
+    queryClient.setQueryData('persons', old => (
+      _.set(old, 'data.data', orderedData)
+    ))
+    
+    orderedData.map((person, index) => updatePerson.mutate({ 
+      id: person.id,
+      [CUSTOM_FIELDS_KEYS.order]: index
+    }))
 
-    afterPersons['data']['data'] = orderedData
-    
-    //console.log('after reorder', afterPersons)
-    
-    //queryClient.setQueryData('persons', afterPersons)
   }
 
   return (
